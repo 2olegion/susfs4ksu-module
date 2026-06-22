@@ -24,16 +24,22 @@ jobs:
           echo "BUILD_ID=${RANDOM_STRING}" >> $GITHUB_ENV
           sed -i "s/version=v1.5.2-R.*/version=v1.5.2-CI-${RANDOM_STRING}/" module.prop
 
+      - name: Build ZIP
+        run: |
+          ZIP_NAME="release-1.5.2+_${{ env.BUILD_ID }}.zip"
+          echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
+          zip -r "${ZIP_NAME}" . \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --exclude "node_modules/*" \
+            --exclude "src/*" \
+            --exclude "tests/*" \
+            --exclude "README.md" \
+            --exclude "LICENSE" \
+            --exclude "*.zip"
+
       - name: Upload release artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-1.5.2+_${{ env.BUILD_ID }}
-          path: |
-            ${{ github.workspace }}/**/*
-            !${{ github.workspace }}/.git/**
-            !${{ github.workspace }}/.github/**
-            !${{ github.workspace }}/node_modules/**
-            !${{ github.workspace }}/src/**
-            !${{ github.workspace }}/tests/**
-            !${{ github.workspace }}/README.md
-            !${{ github.workspace }}/LICENSE
+          path: ${{ env.ZIP_NAME }}
